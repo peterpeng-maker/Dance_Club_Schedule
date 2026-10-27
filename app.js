@@ -1670,6 +1670,7 @@ function setupSheet() {
         } catch (e) {
           console.error("Failed to parse cached sheet data", e);
         }
+      }
       const isGas = savedUrl.includes("script.google.com");
       updateSyncStatusUI(isGas ? "online-api" : "online-csv", lastSync, appEvents.length);
       // Auto refresh in background
