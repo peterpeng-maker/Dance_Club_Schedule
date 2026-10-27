@@ -83,16 +83,19 @@ function doGet(e) {
 
       var dateStr = "";
       if (row[4] instanceof Date) {
-        var y = row[4].getFullYear();
-        var m = ("0" + (row[4].getMonth() + 1)).slice(-2);
-        var d = ("0" + row[4].getDate()).slice(-2);
-        dateStr = y + "-" + m + "-" + d;
+        dateStr = Utilities.formatDate(row[4], Session.getScriptTimeZone() || "Asia/Taipei", "yyyy-MM-dd");
       } else {
-        dateStr = String(row[4] || "").trim();
+        var rawDate = String(row[4] || "").trim().replace(/\//g, "-");
+        var dm = rawDate.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (dm) {
+          dateStr = dm[1] + "-" + ("0" + dm[2]).slice(-2) + "-" + ("0" + dm[3]).slice(-2);
+        } else {
+          dateStr = rawDate;
+        }
       }
 
       var monthVal = parseInt(row[7], 10);
-      if (isNaN(monthVal) && dateStr) {
+      if ((isNaN(monthVal) || !monthVal) && dateStr) {
         var parts = dateStr.split("-");
         if (parts.length >= 2) monthVal = parseInt(parts[1], 10);
       }
@@ -151,35 +154,47 @@ function doPost(e) {
     }
 
     var payload = JSON.parse(postData);
-    var events = Array.isArray(payload) ? payload : (payload.events || payload.data || []);
+    var incomingEvents = Array.isArray(payload) ? payload : (payload.events || payload.data || []);
 
-    if (!Array.isArray(events)) {
+    if (!Array.isArray(incomingEvents)) {
       return createJsonResponse_({
         status: "error",
         message: "Payload format invalid: expected an array of events"
       });
     }
 
-    // 清除舊資料（保留標題列）
+    // 確保標題列完整
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+
+    // 讀取既有工作表資料（以 id 建立索引與行號對應）
     var lastRow = sheet.getLastRow();
+    var existingIdMap = {}; // id -> rowIndex (1-indexed)
+    var maxRow = 1;
+
     if (lastRow > 1) {
-      sheet.getRange(2, 1, lastRow - 1, HEADERS.length).clearContent();
+      var existingData = sheet.getRange(2, 1, lastRow - 1, HEADERS.length).getValues();
+      for (var r = 0; r < existingData.length; r++) {
+        var rowId = String(existingData[r][0] || "").trim();
+        if (rowId) {
+          existingIdMap[rowId] = r + 2; // 第 1 列是標題，故第一筆資料是第 2 列
+        }
+      }
+      maxRow = lastRow;
     }
 
-    if (events.length === 0) {
-      return createJsonResponse_({
-        status: "success",
-        message: "Sheet cleared, 0 events written",
-        count: 0
-      });
-    }
+    // 逐筆進行 Upsert（存在則更新該列，不存在則追加到最下方）
+    var updatedCount = 0;
+    var insertedCount = 0;
+    var newRowsToAppend = [];
 
-    // 準備批次寫入的二維陣列
-    var rows = [];
-    for (var i = 0; i < events.length; i++) {
-      var item = events[i];
-      var row = [
-        item.id || ("evt-" + (i + 1)),
+    for (var i = 0; i < incomingEvents.length; i++) {
+      var item = incomingEvents[i];
+      var id = String(item.id || "").trim();
+      if (!id && !item.title) continue;
+      if (!id) id = "evt-" + new Date().getTime() + "-" + i;
+
+      var rowData = [
+        id,
         item.category || "practice",
         item.categoryName || "練舞場地",
         item.title || "",
@@ -195,16 +210,30 @@ function doPost(e) {
         item.itemsToBring || "",
         item.status || "confirmed"
       ];
-      rows.push(row);
+
+      if (existingIdMap[id]) {
+        // ID 已存在：精確更新該列，絕不影響其他手動新增的列
+        var targetRowIndex = existingIdMap[id];
+        sheet.getRange(targetRowIndex, 1, 1, HEADERS.length).setValues([rowData]);
+        updatedCount++;
+      } else {
+        // ID 不存在：排入追加清單
+        newRowsToAppend.push(rowData);
+        insertedCount++;
+      }
     }
 
-    // 一次性寫入試算表
-    sheet.getRange(2, 1, rows.length, HEADERS.length).setValues(rows);
+    // 若有新資料，批次追加到試算表末尾
+    if (newRowsToAppend.length > 0) {
+      sheet.getRange(maxRow + 1, 1, newRowsToAppend.length, HEADERS.length).setValues(newRowsToAppend);
+    }
 
     return createJsonResponse_({
       status: "success",
-      message: "成功儲存 " + events.length + " 筆活動至 Google 試算表",
-      count: events.length,
+      message: "成功同步！更新 " + updatedCount + " 筆、新增 " + insertedCount + " 筆，未變更的手動資料完整保留。",
+      updatedCount: updatedCount,
+      insertedCount: insertedCount,
+      totalReceived: incomingEvents.length,
       timestamp: new Date().toISOString()
     });
   } catch (err) {
@@ -279,7 +308,7 @@ function setupSheet() {
       "全體舞者出席", "換鞋、水瓶、練舞服", "confirmed"
     ],
     [
-      "anniversary-2611-01", "anniversary", "週年慶典", "🎉 熱舞社二週年（副堂）(11/13)", "2026-11-13", "7:30PM-9:30PM", "週五", 11,
+      "anniversary-2611-01", "anniversary", "週年慶典", "🎉 熱舞社二週年（副堂）(11/13)", "2026-11-13", "待確認", "週五", 11,
       "副堂", "", "熱舞社成立二週年慶典",
       "熱舞社二週年紀念活動！\n地點：副堂\n\n這是我們一起走過兩年的里程碑，一起慶祝、回顧、展望未來！",
       "全體舞者、歷屆夥伴", "美好的心情、回憶！", "confirmed"
@@ -303,7 +332,7 @@ function setupSheet() {
       "全體舞者出席", "換鞋、水瓶、練舞服", "confirmed"
     ],
     [
-      "celebration-2612-01", "celebration", "慶功宴", "🥂 美恩家慶功宴 (12/11)", "2026-12-11", "7:30PM-9:30PM", "週五", 12,
+      "celebration-2612-01", "celebration", "慶功宴", "🥂 美恩家慶功宴 (12/11)", "2026-12-11", "待確認", "週五", 12,
       "美恩工作室", "https://maps.google.com/?q=台北市青島東路四號七樓之三", "年末慶功宴",
       "年末慶功宴！一起慶祝今年的成果與努力🎊\n地點：美恩工作室\n捷運：善導寺站（二號出口，有電梯）\n地址：台北市青島東路四號七樓之三\n門鈴：73#",
       "全體舞者參加", "好心情、可以帶小點心分享！", "confirmed"
@@ -363,13 +392,6 @@ function setupSheet() {
       "中正紀念堂(戲劇院)", "https://maps.google.com/?q=國家戲劇院", "定期練舞",
       "練舞地點：中正紀念堂(戲劇院) 側迴廊/藝文廣場\n捷運：中正紀念堂站 5 號出口步行 2 分鐘（愛國東路側）\n練習時間：7:30PM-9:30PM\n備註：請備足飲水、毛巾、更換舞鞋，注意音量管制。",
       "全體舞者出席", "換鞋、水瓶、毛巾、練舞服", "confirmed"
-    ],
-    // 戶外練舞 — 中正紀念堂廣場 (11/28)
-    [
-      "practice-cksmh-2611-01", "practice", "練舞場地", "戶外練舞 — 中正紀念堂廣場 (11/28)", "2026-11-28", "7:30PM-9:30PM", "週六", 11,
-      "中正紀念堂廣場", "https://maps.google.com/?q=中正紀念堂兩廳院藝文廣場", "戶外大隊排舞與隊形演練",
-      "練舞地點：中正紀念堂廣場（兩廳院藝文廣場）\n捷運：中正紀念堂站 5 號出口步行 1 分鐘\n檔期參照：熱Hope行事曆（兩廳院檔期）\n備註：請備足飲水、毛巾、備用鞋、耳機或中小型音響（注意音量管制）。",
-      "全體舞者出席", "水瓶、換鞋、毛巾、防曬防蚊用品", "confirmed"
     ]
   ];
 

@@ -15,11 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
   const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbyw1nMs5D5glmsLfoXRwlySI2-wskH8423CAgDsYAENEp6e5SsG0YIQpkz-5nkk4IED/exec";
   const STORAGE_CUSTOM_EVENTS = "dance_club_custom_events_2026";
-  // 版本號：更新時自動清除舊快取，確保新行程（如 2027 年）立即顯示
-  const DATA_VERSION = "dance.3";
+  // 版本號：更新時自動清除舊快取，確保新行程立即顯示
+  const DATA_VERSION = "dance.4";
   const STORAGE_DATA_VERSION = "dance_club_data_version";
 
-  // 清除舊版本快取，確保 2027 年新行程可以正常載入
+  // 清除舊版本快取，確保最新行程與修改可以正常載入
   const storedDataVersion = localStorage.getItem(STORAGE_DATA_VERSION);
   if (storedDataVersion !== DATA_VERSION) {
     localStorage.removeItem("dance_club_sheet_cache_2026");
@@ -45,13 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
       console.warn("Failed to parse saved custom events", e);
     }
   }
-
-  // 強制統一所有練習行程時間為 7:30PM-9:30PM（無論快取內容為何）
-  appEvents.forEach(e => {
-    if (e.category === "practice" || (e.title && e.title.includes("練舞"))) {
-      e.time = "7:30PM-9:30PM";
-    }
-  });
 
   // DOM Elements
   const badgeYearText = document.getElementById("badgeYearText");
@@ -426,7 +419,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const calendarEvents = appEvents.filter(evt => {
       const matchesYear = evt.date.startsWith(currentCalendarYear + "-") || (evt.endDate && evt.endDate.startsWith(currentCalendarYear + "-"));
-      const matchesCategory = (currentCategory === "all") || (evt.category === currentCategory);
+      let matchesCategory = true;
+      if (currentCategory !== "all") {
+        if (currentCategory === "cksmh_concert") {
+          matchesCategory = (evt.location && evt.location.includes("音樂廳")) || (evt.title && evt.title.includes("音樂廳"));
+        } else if (currentCategory === "cksmh_theater") {
+          matchesCategory = (evt.location && evt.location.includes("戲劇院")) || (evt.title && evt.title.includes("戲劇院"));
+        } else {
+          matchesCategory = (evt.category === currentCategory);
+        }
+      }
       let matchesSearch = true;
       if (searchQuery.trim() !== "") {
         const q = searchQuery.toLowerCase();
@@ -1558,24 +1560,66 @@ function doPost(e) {
       return createJsonResponse_({ status: "error", message: "缺少 POST 內容" });
     }
     var payload = JSON.parse(e.postData.contents);
-    var events = Array.isArray(payload) ? payload : (payload.events || []);
+    var incomingEvents = Array.isArray(payload) ? payload : (payload.events || payload.data || []);
+    if (!Array.isArray(incomingEvents)) {
+      return createJsonResponse_({ status: "error", message: "資料格式錯誤：需要活動陣列" });
+    }
+
     var sheet = getTargetSheet_();
-    var lastRow = sheet.getLastRow();
-    var lastCol = Math.max(sheet.getLastColumn(), HEADERS.length);
     sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+
+    var lastRow = sheet.getLastRow();
+    var existingIdMap = {};
+    var maxRow = 1;
+
     if (lastRow > 1) {
-      sheet.getRange(2, 1, lastRow - 1, lastCol).clearContent();
+      var existingData = sheet.getRange(2, 1, lastRow - 1, HEADERS.length).getValues();
+      for (var r = 0; r < existingData.length; r++) {
+        var rowId = String(existingData[r][0] || "").trim();
+        if (rowId) {
+          existingIdMap[rowId] = r + 2;
+        }
+      }
+      maxRow = lastRow;
     }
-    if (events.length > 0) {
-      var rows = events.map(function(item) {
-        return HEADERS.map(function(h) {
-          var v = item[h];
-          return v !== undefined && v !== null ? String(v) : "";
-        });
+
+    var updatedCount = 0;
+    var insertedCount = 0;
+    var newRowsToAppend = [];
+
+    for (var i = 0; i < incomingEvents.length; i++) {
+      var item = incomingEvents[i];
+      var id = String(item.id || "").trim();
+      if (!id && !item.title) continue;
+      if (!id) id = "evt-" + new Date().getTime() + "-" + i;
+
+      var rowData = HEADERS.map(function(h) {
+        var v = (h === "id") ? id : item[h];
+        return v !== undefined && v !== null ? String(v) : "";
       });
-      sheet.getRange(2, 1, rows.length, HEADERS.length).setValues(rows);
+
+      if (existingIdMap[id]) {
+        var targetRowIndex = existingIdMap[id];
+        sheet.getRange(targetRowIndex, 1, 1, HEADERS.length).setValues([rowData]);
+        updatedCount++;
+      } else {
+        newRowsToAppend.push(rowData);
+        insertedCount++;
+      }
     }
-    return createJsonResponse_({ status: "success", message: "成功寫入 " + events.length + " 筆活動至 Google 試算表！", count: events.length, timestamp: new Date().toISOString() });
+
+    if (newRowsToAppend.length > 0) {
+      sheet.getRange(maxRow + 1, 1, newRowsToAppend.length, HEADERS.length).setValues(newRowsToAppend);
+    }
+
+    return createJsonResponse_({
+      status: "success",
+      message: "成功同步！更新 " + updatedCount + " 筆、新增 " + insertedCount + " 筆，未變更的既有資料完整保留！",
+      updatedCount: updatedCount,
+      insertedCount: insertedCount,
+      count: incomingEvents.length,
+      timestamp: new Date().toISOString()
+    });
   } catch (err) {
     return createJsonResponse_({ status: "error", message: err.toString() });
   }
@@ -1587,19 +1631,19 @@ function createJsonResponse_(obj) {
 
 function getTargetSheet_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  return ss.getSheetByName("2027事工行事曆") || ss.getSheetByName("工作表1") || ss.getActiveSheet();
+  return ss.getSheetByName("熱舞社行事曆") || ss.getSheetByName("工作表1") || ss.getSheetByName("Sheet1") || ss.getActiveSheet();
 }
 
 function setupSheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("2027事工行事曆") || ss.getActiveSheet();
-  sheet.setName("2027事工行事曆");
+  var sheet = ss.getSheetByName("熱舞社行事曆") || ss.getActiveSheet();
+  sheet.setName("熱舞社行事曆");
   var headerRange = sheet.getRange(1, 1, 1, HEADERS.length);
   headerRange.setValues([HEADERS]);
-  headerRange.setFontWeight("bold").setFontColor("#ffffff").setBackground("#1e293b").setHorizontalAlignment("center");
+  headerRange.setFontWeight("bold").setFontColor("#ffffff").setBackground("#4c1d95").setHorizontalAlignment("center");
   sheet.setRowHeight(1, 36);
   sheet.setFrozenRows(1);
-  Logger.log("✅ 試算表已完成格式初始化！");
+  Logger.log("✅ 熱舞社試算表已完成格式初始化！");
 }
 `;
 
@@ -1626,13 +1670,6 @@ function setupSheet() {
         } catch (e) {
           console.error("Failed to parse cached sheet data", e);
         }
-      }
-      // 強制統一所有練習行程時間為 7:30PM-9:30PM
-      appEvents.forEach(e => {
-        if (e.category === "practice" || (e.title && e.title.includes("練舞"))) {
-          e.time = "7:30PM-9:30PM";
-        }
-      });
       const isGas = savedUrl.includes("script.google.com");
       updateSyncStatusUI(isGas ? "online-api" : "online-csv", lastSync, appEvents.length);
       // Auto refresh in background
@@ -1985,18 +2022,17 @@ function setupSheet() {
         if (json.status === "error") {
           throw new Error(json.message || "Google Apps Script 執行錯誤");
         }
-        newEvents = Array.isArray(json) ? json : (json.events || []);
+        newEvents = Array.isArray(json) ? json : (json.data || json.events || []);
       } else {
         const rows = parseCSV(text);
         newEvents = transformRowsToEvents(rows);
       }
 
       if (newEvents.length === 0) {
-        // 試算表為空 — 自動推送本機資料
+        // 試算表為空 — 不自動推送（防止誤覆蓋），僅提示使用者
         if (isSilent) {
-          // 頁面載入時靜默自動推送（試算表剛建立尚無資料）
-          console.log("[Dance Club] 試算表為空，自動推送本機資料至雲端...");
-          await pushToGoogleSheets(url, true);
+          console.log("[Dance Club] 試算表為空或無法讀取，保留本機資料，不自動推送。");
+          updateSyncStatusUI("offline", localStorage.getItem(STORAGE_SHEET_LAST_SYNC), appEvents.length);
           return;
         } else {
           if (confirm(`雲端試算表目前為空（尚無任何活動資料）。\n\n是否立即將目前的 ${appEvents.length} 筆活動推送到 Google 試算表？`)) {
@@ -2007,19 +2043,58 @@ function setupSheet() {
         throw new Error("無法從試算表中辨識出有效的事工活動資料，請確認欄位標題是否正確。");
       }
 
-      // Merge with official default events so 2026/2027 defaults are not lost
-      const sheetIds = new Set(newEvents.map(e => e.id));
-      const missingDefaults = (window.EVENTS_DATA || []).filter(e => !sheetIds.has(e.id));
-      // 若 Sheet 裡的 time 是「待確認」或空，以本機 events-data.js 的值補回
-      const localEventMap = {};
-      (window.EVENTS_DATA || []).forEach(e => { localEventMap[e.id] = e; });
-      newEvents.forEach(e => {
-        if (!e.time || e.time === "待確認" || e.time === "時間待定") {
-          if (localEventMap[e.id] && localEventMap[e.id].time) {
-            e.time = localEventMap[e.id].time;
+      // ⚠️ 防呆：若 Sheet 回傳筆數遠少於本機 EVENTS_DATA（可能是舊 setupSheet 初始值 or 誤清空），
+      // 不覆蓋本機資料，提示使用者確認
+      const localDefault = window.EVENTS_DATA || [];
+      if (!isSilent && newEvents.length < localDefault.length * 0.6) {
+        const confirm2 = confirm(`雲端試算表只有 ${newEvents.length} 筆資料，而本機有 ${appEvents.length} 筆（包含 2027 年等新行程）。\n\n若直接套用雲端資料，2027 年等新行程可能消失！\n\n【建議】先用「推送到雲端」將完整資料上傳到 Sheet，再做同步。\n\n確定要以雲端的 ${newEvents.length} 筆覆蓋本機資料嗎？`);
+        if (!confirm2) {
+          updateSyncStatusUI(url.includes("script.google.com") ? "online-api" : "online-csv", localStorage.getItem(STORAGE_SHEET_LAST_SYNC), appEvents.length);
+          if (!isSilent) showToast("已取消，保留本機資料。建議先「推送到雲端」再同步。");
+          return;
+        }
+      }
+      if (isSilent && newEvents.length < localDefault.length * 0.6) {
+        console.log(`[Dance Club] 試算表只有 ${newEvents.length} 筆（本機 ${localDefault.length} 筆），靜默模式下不覆蓋本機資料。`);
+        updateSyncStatusUI("offline", localStorage.getItem(STORAGE_SHEET_LAST_SYNC), appEvents.length);
+        return;
+      }
+
+      // 日期標準化函數
+      function normalizeDate(d) {
+        if (!d) return "";
+        const s = String(d).trim().replace(/\//g, "-");
+        const match = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (match) {
+          return `${match[1]}-${match[2].padStart(2, "0")}-${match[3].padStart(2, "0")}`;
+        }
+        return s;
+      }
+
+      // 逐筆標準化與去除重複 ID（以試算表最新一筆為準）
+      const uniqueEventsMap = new Map();
+      newEvents.forEach((e, idx) => {
+        if (!e) return;
+        if (e.date) {
+          e.date = normalizeDate(e.date);
+          const parts = e.date.split("-");
+          if (parts.length >= 2) {
+            e.month = parseInt(parts[1], 10);
           }
         }
+        const id = String(e.id || "").trim() || `evt-${e.date || 'item'}-${idx}`;
+        e.id = id;
+        uniqueEventsMap.set(id, e);
       });
+      newEvents = Array.from(uniqueEventsMap.values());
+
+      // 檢查試算表是否已包含 2027 年活動；若試算表內尚未建立 2027 年，才補齊官方 2027 預設
+      const has2027InSheet = newEvents.some(e => (e.date || "").startsWith("2027-"));
+      const sheetIds = new Set(newEvents.map(e => e.id));
+      const missingDefaults = has2027InSheet
+        ? []
+        : (window.EVENTS_DATA || []).filter(e => !sheetIds.has(e.id) && (e.date || "").startsWith("2027-"));
+
       appEvents = [...newEvents, ...missingDefaults];
       const now = new Date().toISOString();
       localStorage.setItem(STORAGE_SHEET_URL, url);
@@ -2105,7 +2180,7 @@ function setupSheet() {
       updateSyncStatusUI("online-api", now, appEvents.length);
 
       if (!isSilent) {
-        showToast(`🎉 成功推送到雲端！已寫入 ${appEvents.length} 筆活動至 Google Sheets`);
+        showToast(result.message || `🎉 成功推送到雲端！已同步活動至 Google Sheets`);
       }
       return true;
     } catch (err) {

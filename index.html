@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=dance.1">
+  <link rel="stylesheet" href="style.css?v=dance.2">
   <style>
     /* ===== 熱舞社主題色覆蓋 ===== */
     :root {
@@ -416,10 +416,12 @@
         </button>
       </div>
 
-      <!-- Category Filter Pills -->
+      <!-- Category & Venue Filter Pills -->
       <div class="category-filters" id="categoryFilters">
         <button class="filter-pill active" data-category="all">全部活動</button>
         <button class="filter-pill" data-category="practice">🕺 練舞場地</button>
+        <button class="filter-pill" data-category="cksmh_concert">🏛️ 中正紀念堂(音樂廳)</button>
+        <button class="filter-pill" data-category="cksmh_theater">🎭 中正紀念堂(戲劇院)</button>
         <button class="filter-pill" data-category="anniversary">🎉 週年慶典</button>
         <button class="filter-pill" data-category="celebration">🥂 慶功宴</button>
         <button class="filter-pill" data-category="performance">🎤 演出服事</button>
@@ -457,7 +459,7 @@
         <!-- Rendered by JS -->
       </div>
 
-      <!-- 場地速查資訊卡 (支援 美恩工作室 & 中正紀念堂廣場 雙場地切換) -->
+      <!-- 場地速查資訊卡 (支援 美恩工作室 / 中正紀念堂音樂廳 / 中正紀念堂戲劇院 三場地切換) -->
       <div class="venue-info-card">
         <div class="venue-tab-header">
           <h4>📍 練舞與活動場地指南</h4>
@@ -465,8 +467,11 @@
             <button type="button" class="venue-tab-btn active" id="tabBtnMeien" data-venue-target="venue-panel-meien">
               🏠 美恩工作室
             </button>
-            <button type="button" class="venue-tab-btn" id="tabBtnCksmh" data-venue-target="venue-panel-cksmh">
-              🏛️ 中正紀念堂廣場
+            <button type="button" class="venue-tab-btn" id="tabBtnConcert" data-venue-target="venue-panel-concert">
+              🏛️ 中正紀念堂(音樂廳)
+            </button>
+            <button type="button" class="venue-tab-btn" id="tabBtnTheater" data-venue-target="venue-panel-theater">
+              🎭 中正紀念堂(戲劇院)
             </button>
           </div>
         </div>
@@ -487,38 +492,64 @@
           </div>
         </div>
 
-        <!-- 場地 2: 中正紀念堂廣場 -->
-        <div id="venue-panel-cksmh" class="venue-tab-panel">
-          <div class="venue-badge-pill cksmh">戶外大隊排舞 ｜ 兩廳院檔期</div>
-          <div class="venue-row"><span class="venue-icon">🚇</span><span><strong>捷運：</strong>中正紀念堂站（5 號出口步行 1 分鐘，直達兩廳院藝文廣場）</span></div>
-          <div class="venue-row"><span class="venue-icon">🏛️</span><span><strong>地址：</strong>台北市中正區中山南路21-1號（國家兩廳院）</span></div>
-          <div class="venue-row"><span class="venue-icon">🎭</span><span><strong>場地區域：</strong>國家音樂廳側廣場 / 國家戲劇院側廣場 / 民主大道</span></div>
-          <div class="venue-row"><span class="venue-icon">📋</span><span><strong>可用檔期狀態（參照 熱Hope行事曆）：</strong></span></div>
+        <!-- 場地 2: 中正紀念堂(音樂廳) -->
+        <div id="venue-panel-concert" class="venue-tab-panel">
+          <div class="venue-badge-pill cksmh">戶外排舞 ｜ 2027年 1 月排練場地 (1/8, 1/15, 1/22, 1/29)</div>
+          <div class="venue-row"><span class="venue-icon">🚇</span><span><strong>捷運：</strong>中正紀念堂站（5 號出口步行 1 分鐘，直出右側國家音樂廳側迴廊 / 廣場）</span></div>
+          <div class="venue-row"><span class="venue-icon">🏛️</span><span><strong>地址：</strong>台北市中正區中山南路21-1號（國家音樂廳側）</span></div>
+          <div class="venue-row"><span class="venue-icon">⏰</span><span><strong>練舞時間：</strong>每週五 7:30PM - 9:30PM</span></div>
+          <div class="venue-row"><span class="venue-icon">🎭</span><span><strong>場地區域：</strong>國家音樂廳側地面迴廊 / 地下停車場上方平台</span></div>
+          <div class="venue-row"><span class="venue-icon">📋</span><span><strong>兩廳院可用檔期標示：</strong></span></div>
           
           <!-- 檔期狀態圖例說明 -->
           <div class="cksmh-legend-box">
-            <div style="font-weight: 700; color: #34d399; font-size: 0.85rem; margin-bottom: 0.35rem;">兩廳院廣場借用檔期對照說明：</div>
+            <div style="font-weight: 700; color: #60a5fa; font-size: 0.85rem; margin-bottom: 0.35rem;">兩廳院廣場檔期對照說明：</div>
             <div class="cksmh-legend-grid">
-              <div class="cksmh-legend-item" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #34d399;">
-                <span>🟢</span><strong>兩廳皆可</strong>：音樂廳與戲劇院廣場均可使用，最適合大隊排舞
-              </div>
               <div class="cksmh-legend-item" style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #60a5fa;">
-                <span>🔵</span><strong>音樂廳</strong>：僅音樂廳側廣場可用
+                <span>🔵</span><strong>音樂廳</strong>：音樂廳側廣場可用（2027年 1 月主要練舞點）
               </div>
-              <div class="cksmh-legend-item" style="background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #c084fc;">
-                <span>🟣</span><strong>戲劇院</strong>：僅戲劇院側廣場可用
-              </div>
-              <div class="cksmh-legend-item" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171;">
-                <span>🔴</span><strong>兩廳皆不可</strong>：有大型演出或專案檔期，不開放借用
+              <div class="cksmh-legend-item" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #34d399;">
+                <span>🟢</span><strong>兩廳皆可</strong>：音樂廳與戲劇院廣場均可使用
               </div>
             </div>
           </div>
 
-          <div class="venue-row" style="margin-top: 0.6rem;"><span class="venue-icon">🎒</span><span><strong>練舞叮嚀：</strong>請遵守戶外音量規範（建議耳機或攜帶中小型音響），備妥充足飲用水、毛巾與更換舞鞋。</span></div>
+          <div class="venue-row" style="margin-top: 0.6rem;"><span class="venue-icon">🎒</span><span><strong>練舞叮嚀：</strong>請遵守戶外音量管制規範，備妥充足飲用水、毛巾與更換舞鞋。</span></div>
           <div class="venue-action-row">
-            <a class="venue-map-link" href="https://maps.google.com/?q=中正紀念堂兩廳院藝文廣場" target="_blank" rel="noopener">
+            <a class="venue-map-link" href="https://maps.google.com/?q=國家音樂廳" target="_blank" rel="noopener">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-              Google Maps 導航
+              Google Maps 導航至國家音樂廳
+            </a>
+          </div>
+        </div>
+
+        <!-- 場地 3: 中正紀念堂(戲劇院) -->
+        <div id="venue-panel-theater" class="venue-tab-panel">
+          <div class="venue-badge-pill cksmh" style="background: rgba(168,85,247,0.15); color: #c084fc; border-color: rgba(168,85,247,0.35);">戶外排舞 ｜ 2027年 2 月排練場地 (2/12, 2/19, 2/26)</div>
+          <div class="venue-row"><span class="venue-icon">🚇</span><span><strong>捷運：</strong>中正紀念堂站（5 號出口步行 2 分鐘，朝愛國東路側國家戲劇院迴廊）</span></div>
+          <div class="venue-row"><span class="venue-icon">🏛️</span><span><strong>地址：</strong>台北市中正區中山南路21-1號（國家戲劇院側）</span></div>
+          <div class="venue-row"><span class="venue-icon">⏰</span><span><strong>練舞時間：</strong>每週五 7:30PM - 9:30PM</span></div>
+          <div class="venue-row"><span class="venue-icon">🎭</span><span><strong>場地區域：</strong>國家戲劇院地面迴廊 / 大階梯前藝文廣場側</span></div>
+          <div class="venue-row"><span class="venue-icon">📋</span><span><strong>兩廳院可用檔期標示：</strong></span></div>
+          
+          <!-- 檔期狀態圖例說明 -->
+          <div class="cksmh-legend-box">
+            <div style="font-weight: 700; color: #c084fc; font-size: 0.85rem; margin-bottom: 0.35rem;">兩廳院廣場檔期對照說明：</div>
+            <div class="cksmh-legend-grid">
+              <div class="cksmh-legend-item" style="background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #c084fc;">
+                <span>🟣</span><strong>戲劇院</strong>：戲劇院側廣場可用（2027年 2 月主要練舞點）
+              </div>
+              <div class="cksmh-legend-item" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #34d399;">
+                <span>🟢</span><strong>兩廳皆可</strong>：音樂廳與戲劇院廣場均可使用
+              </div>
+            </div>
+          </div>
+
+          <div class="venue-row" style="margin-top: 0.6rem;"><span class="venue-icon">🎒</span><span><strong>練舞叮嚀：</strong>請遵守戶外音量管制規範，備妥充足飲用水、毛巾與更換舞鞋。</span></div>
+          <div class="venue-action-row">
+            <a class="venue-map-link" href="https://maps.google.com/?q=國家戲劇院" target="_blank" rel="noopener">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              Google Maps 導航至國家戲劇院
             </a>
           </div>
         </div>
@@ -689,6 +720,8 @@
           <button class="line-tab" data-tab="angel-series">演出服事行程</button>
           <button class="line-tab" data-tab="q1">11 月行程</button>
           <button class="line-tab" data-tab="q2">12 月行程</button>
+          <button class="line-tab" data-tab="y27m1">2027/1月 (音樂廳)</button>
+          <button class="line-tab" data-tab="y27m2">2027/2月 (戲劇院)</button>
         </div>
         <textarea id="lineTextOutput" class="line-textarea" readonly rows="12"></textarea>
       </div>
@@ -761,8 +794,10 @@
         <div class="admin-list-toolbar">
           <input type="text" id="adminSearchInput" class="admin-search" placeholder="搜尋活動名稱、地點...">
           <select id="adminCategoryFilter" class="admin-filter-select">
-            <option value="all">全部類別</option>
+            <option value="all">全部類別與場地</option>
             <option value="practice">練舞場地</option>
+            <option value="cksmh_concert">🏛️ 中正紀念堂(音樂廳)</option>
+            <option value="cksmh_theater">🎭 中正紀念堂(戲劇院)</option>
             <option value="anniversary">週年慶典</option>
             <option value="celebration">慶功宴</option>
             <option value="performance">演出服事</option>
@@ -805,14 +840,15 @@
             </div>
             <div class="admin-form-group">
               <label class="admin-label">時間</label>
-              <input type="text" id="ef-time" class="admin-input" placeholder="例：7:00 PM - 9:30 PM">
+              <input type="text" id="ef-time" class="admin-input" placeholder="例：7:30 PM - 9:30 PM" value="7:30PM-9:30PM">
             </div>
             <div class="admin-form-group">
               <label class="admin-label">地點 *</label>
-              <input type="text" id="ef-location" class="admin-input" placeholder="例：美恩工作室" required>
+              <input type="text" id="ef-location" class="admin-input" placeholder="例：中正紀念堂(音樂廳)" required>
               <div class="quick-location-tags">
                 <button type="button" class="quick-loc-tag" data-loc="美恩工作室" data-url="https://maps.google.com/?q=台北市青島東路四號七樓之三">🏠 美恩家</button>
-                <button type="button" class="quick-loc-tag" data-loc="中正紀念堂廣場" data-url="https://maps.google.com/?q=中正紀念堂兩廳院藝文廣場">🏛️ 中正紀念堂廣場</button>
+                <button type="button" class="quick-loc-tag" data-loc="中正紀念堂(音樂廳)" data-url="https://maps.google.com/?q=國家音樂廳">🏛️ 中正紀念堂(音樂廳)</button>
+                <button type="button" class="quick-loc-tag" data-loc="中正紀念堂(戲劇院)" data-url="https://maps.google.com/?q=國家戲劇院">🎭 中正紀念堂(戲劇院)</button>
                 <button type="button" class="quick-loc-tag" data-loc="副堂" data-url="">⛪ 副堂</button>
               </div>
             </div>
@@ -926,7 +962,7 @@
             <strong>Google Apps Script (Web App API) 或 試算表發布網址</strong>
           </label>
           <div class="sheet-input-wrapper">
-            <input type="url" id="sheetUrlInput" class="sheet-url-input" value="" placeholder="https://script.google.com/macros/s/AKfycb.../exec" spellcheck="false" autocomplete="off">
+            <input type="url" id="sheetUrlInput" class="sheet-url-input" value="https://script.google.com/macros/s/AKfycbyw1nMs5D5glmsLfoXRwlySI2-wskH8423CAgDsYAENEp6e5SsG0YIQpkz-5nkk4IED/exec" placeholder="https://script.google.com/macros/s/AKfycb.../exec" spellcheck="false" autocomplete="off">
           </div>
           <div style="display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap;">
             <button id="testSheetSyncBtn" class="btn btn-primary" title="從 Google 試算表拉取最新活動">
@@ -997,7 +1033,7 @@
     </button>
   </nav>
 
-  <script src="events-data.js?v=dance.1"></script>
-  <script src="app.js?v=dance.1"></script>
+  <script src="events-data.js?v=dance.4"></script>
+  <script src="app.js?v=dance.4"></script>
 </body>
 </html>

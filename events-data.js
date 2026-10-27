@@ -1,10 +1,10 @@
 // 熱舞社行事曆 Dance Club Schedule — Events Data Source
-// 版本：dance.1
+// 版本：dance.2（2027年行程更新）
 // 美恩工作室：台北市青島東路四號七樓之三（善導寺站）門鈴73#
 
 const EVENTS_DATA = [
   // ==========================================
-  // 11 月練舞場地
+  // 2026 年 11 月練舞場地
   // ==========================================
   {
     id: "practice-2611-01",
@@ -12,7 +12,7 @@ const EVENTS_DATA = [
     category: "practice",
     categoryName: "練舞場地",
     date: "2026-11-05",
-    time: "待確認",
+    time: "7:30PM-9:30PM",
     dayOfWeek: "週四",
     month: 11,
     location: "美恩工作室",
@@ -46,7 +46,7 @@ const EVENTS_DATA = [
     category: "practice",
     categoryName: "練舞場地",
     date: "2026-11-20",
-    time: "待確認",
+    time: "7:30PM-9:30PM",
     dayOfWeek: "週五",
     month: 11,
     location: "美恩工作室",
@@ -57,9 +57,26 @@ const EVENTS_DATA = [
     itemsToBring: "換鞋、水瓶、練舞服",
     status: "confirmed"
   },
+  {
+    id: "practice-cksmh-2611-01",
+    title: "戶外練舞 — 中正紀念堂廣場 (11/28)",
+    category: "practice",
+    categoryName: "練舞場地",
+    date: "2026-11-28",
+    time: "7:30PM-9:30PM",
+    dayOfWeek: "週六",
+    month: 11,
+    location: "中正紀念堂廣場",
+    locationUrl: "https://maps.google.com/?q=中正紀念堂兩廳院藝文廣場",
+    topic: "戶外大隊排舞與隊形演練",
+    description: "練舞地點：中正紀念堂廣場（兩廳院藝文廣場）\n捷運：中正紀念堂站 5 號出口步行 1 分鐘\n檔期參照：熱Hope行事曆（兩廳院檔期）\n備註：請備足飲水、毛巾、備用鞋、耳機或中小型音響（注意音量管制）。",
+    needs: "全體舞者出席",
+    itemsToBring: "水瓶、換鞋、毛巾、防曬防蚊用品",
+    status: "confirmed"
+  },
 
   // ==========================================
-  // 12 月練舞場地
+  // 2026 年 12 月練舞場地
   // ==========================================
   {
     id: "practice-2612-01",
@@ -67,7 +84,7 @@ const EVENTS_DATA = [
     category: "practice",
     categoryName: "練舞場地",
     date: "2026-12-04",
-    time: "待確認",
+    time: "7:30PM-9:30PM",
     dayOfWeek: "週五",
     month: 12,
     location: "美恩工作室",
@@ -101,7 +118,7 @@ const EVENTS_DATA = [
     category: "practice",
     categoryName: "練舞場地",
     date: "2026-12-18",
-    time: "待確認",
+    time: "7:30PM-9:30PM",
     dayOfWeek: "週五",
     month: 12,
     location: "美恩工作室",
@@ -112,10 +129,6 @@ const EVENTS_DATA = [
     itemsToBring: "換鞋、水瓶、練舞服",
     status: "confirmed"
   },
-
-  // ==========================================
-  // 不定期演出服事（待確認）
-  // ==========================================
   {
     id: "performance-tbd-01",
     title: "演出服事（待確認）",
@@ -133,21 +146,131 @@ const EVENTS_DATA = [
     itemsToBring: "演出服、道具",
     status: "tentative"
   },
+
+  // ==========================================
+  // 2027 年 1 月練舞場地（中正紀念堂 音樂廳）
+  // ==========================================
   {
-    id: "practice-cksmh-2611-01",
-    title: "戶外練舞 — 中正紀念堂廣場 (11/28)",
+    id: "practice-2701-08",
+    title: "練舞 — 中正紀念堂(音樂廳) (1/8)",
     category: "practice",
     categoryName: "練舞場地",
-    date: "2026-11-28",
-    time: "14:00 - 17:00",
-    dayOfWeek: "週六",
-    month: 11,
-    location: "中正紀念堂廣場",
-    locationUrl: "https://maps.google.com/?q=中正紀念堂兩廳院藝文廣場",
-    topic: "戶外大隊排舞與隊形演練",
-    description: "練舞地點：中正紀念堂廣場（兩廳院藝文廣場）\n捷運：中正紀念堂站 5 號出口步行 1 分鐘\n檔期參照：熱Hope行事曆（兩廳院檔期）\n備註：請備足飲水、毛巾、備用鞋、耳機或中小型音響（注意音量管制）。",
+    date: "2027-01-08",
+    time: "7:30PM-9:30PM",
+    dayOfWeek: "週五",
+    month: 1,
+    location: "中正紀念堂(音樂廳)",
+    locationUrl: "https://maps.google.com/?q=國家音樂廳",
+    topic: "定期練舞",
+    description: "練舞地點：中正紀念堂(音樂廳) 側迴廊/藝文廣場\n捷運：中正紀念堂站 5 號出口步行 1 分鐘\n練習時間：7:30PM-9:30PM\n備註：請備足飲水、毛巾、更換舞鞋，注意音量管制。",
     needs: "全體舞者出席",
-    itemsToBring: "水瓶、換鞋、毛巾、防曬防蚊用品",
+    itemsToBring: "換鞋、水瓶、毛巾、練舞服",
+    status: "confirmed"
+  },
+  {
+    id: "practice-2701-15",
+    title: "練舞 — 中正紀念堂(音樂廳) (1/15)",
+    category: "practice",
+    categoryName: "練舞場地",
+    date: "2027-01-15",
+    time: "7:30PM-9:30PM",
+    dayOfWeek: "週五",
+    month: 1,
+    location: "中正紀念堂(音樂廳)",
+    locationUrl: "https://maps.google.com/?q=國家音樂廳",
+    topic: "定期練舞",
+    description: "練舞地點：中正紀念堂(音樂廳) 側迴廊/藝文廣場\n捷運：中正紀念堂站 5 號出口步行 1 分鐘\n練習時間：7:30PM-9:30PM\n備註：請備足飲水、毛巾、更換舞鞋，注意音量管制。",
+    needs: "全體舞者出席",
+    itemsToBring: "換鞋、水瓶、毛巾、練舞服",
+    status: "confirmed"
+  },
+  {
+    id: "practice-2701-22",
+    title: "練舞 — 中正紀念堂(音樂廳) (1/22)",
+    category: "practice",
+    categoryName: "練舞場地",
+    date: "2027-01-22",
+    time: "7:30PM-9:30PM",
+    dayOfWeek: "週五",
+    month: 1,
+    location: "中正紀念堂(音樂廳)",
+    locationUrl: "https://maps.google.com/?q=國家音樂廳",
+    topic: "定期練舞",
+    description: "練舞地點：中正紀念堂(音樂廳) 側迴廊/藝文廣場\n捷運：中正紀念堂站 5 號出口步行 1 分鐘\n練習時間：7:30PM-9:30PM\n備註：請備足飲水、毛巾、更換舞鞋，注意音量管制。",
+    needs: "全體舞者出席",
+    itemsToBring: "換鞋、水瓶、毛巾、練舞服",
+    status: "confirmed"
+  },
+  {
+    id: "practice-2701-29",
+    title: "練舞 — 中正紀念堂(音樂廳) (1/29)",
+    category: "practice",
+    categoryName: "練舞場地",
+    date: "2027-01-29",
+    time: "7:30PM-9:30PM",
+    dayOfWeek: "週五",
+    month: 1,
+    location: "中正紀念堂(音樂廳)",
+    locationUrl: "https://maps.google.com/?q=國家音樂廳",
+    topic: "定期練舞",
+    description: "練舞地點：中正紀念堂(音樂廳) 側迴廊/藝文廣場\n捷運：中正紀念堂站 5 號出口步行 1 分鐘\n練習時間：7:30PM-9:30PM\n備註：請備足飲水、毛巾、更換舞鞋，注意音量管制。",
+    needs: "全體舞者出席",
+    itemsToBring: "換鞋、水瓶、毛巾、練舞服",
+    status: "confirmed"
+  },
+
+  // ==========================================
+  // 2027 年 2 月練舞場地（中正紀念堂 戲劇院）
+  // ==========================================
+  {
+    id: "practice-2702-12",
+    title: "練舞 — 中正紀念堂(戲劇院) (2/12)",
+    category: "practice",
+    categoryName: "練舞場地",
+    date: "2027-02-12",
+    time: "7:30PM-9:30PM",
+    dayOfWeek: "週五",
+    month: 2,
+    location: "中正紀念堂(戲劇院)",
+    locationUrl: "https://maps.google.com/?q=國家戲劇院",
+    topic: "定期練舞",
+    description: "練舞地點：中正紀念堂(戲劇院) 側迴廊/藝文廣場\n捷運：中正紀念堂站 5 號出口步行 2 分鐘（愛國東路側）\n練習時間：7:30PM-9:30PM\n備註：請備足飲水、毛巾、更換舞鞋，注意音量管制。",
+    needs: "全體舞者出席",
+    itemsToBring: "換鞋、水瓶、毛巾、練舞服",
+    status: "confirmed"
+  },
+  {
+    id: "practice-2702-19",
+    title: "練舞 — 中正紀念堂(戲劇院) (2/19)",
+    category: "practice",
+    categoryName: "練舞場地",
+    date: "2027-02-19",
+    time: "7:30PM-9:30PM",
+    dayOfWeek: "週五",
+    month: 2,
+    location: "中正紀念堂(戲劇院)",
+    locationUrl: "https://maps.google.com/?q=國家戲劇院",
+    topic: "定期練舞",
+    description: "練舞地點：中正紀念堂(戲劇院) 側迴廊/藝文廣場\n捷運：中正紀念堂站 5 號出口步行 2 分鐘（愛國東路側）\n練習時間：7:30PM-9:30PM\n備註：請備足飲水、毛巾、更換舞鞋，注意音量管制。",
+    needs: "全體舞者出席",
+    itemsToBring: "換鞋、水瓶、毛巾、練舞服",
+    status: "confirmed"
+  },
+  {
+    id: "practice-2702-26",
+    title: "練舞 — 中正紀念堂(戲劇院) (2/26)",
+    category: "practice",
+    categoryName: "練舞場地",
+    date: "2027-02-26",
+    time: "7:30PM-9:30PM",
+    dayOfWeek: "週五",
+    month: 2,
+    location: "中正紀念堂(戲劇院)",
+    locationUrl: "https://maps.google.com/?q=國家戲劇院",
+    topic: "定期練舞",
+    description: "練舞地點：中正紀念堂(戲劇院) 側迴廊/藝文廣場\n捷運：中正紀念堂站 5 號出口步行 2 分鐘（愛國東路側）\n練習時間：7:30PM-9:30PM\n備註：請備足飲水、毛巾、更換舞鞋，注意音量管制。",
+    needs: "全體舞者出席",
+    itemsToBring: "換鞋、水瓶、毛巾、練舞服",
     status: "confirmed"
   }
 ];
@@ -214,6 +337,32 @@ const VENUES = {
     phone: "0975729815",
     note: "注意：是青島門市，人多會走去千成門市，請注意！\nGoogle搜尋：富邦來來華夏 或 7-11青島門市\n找到二號門後，按73#",
     googleMapsUrl: "https://maps.google.com/?q=台北市青島東路四號七樓之三"
+  },
+  cksmh_concert: {
+    id: "cksmh_concert",
+    name: "中正紀念堂(音樂廳)",
+    shortName: "音樂廳側廣場",
+    tag: "戶外排舞 ｜ 音樂廳側",
+    icon: "🏛️",
+    address: "台北市中正區中山南路21-1號（國家音樂廳側迴廊 / 藝文廣場）",
+    mrt: "中正紀念堂站（5號出口步行1分鐘，直達音樂廳迴廊）",
+    doorbell: "戶外開放迴廊 / 地下停車場上方平台",
+    phone: "02-3393-9888（兩廳院服務台）",
+    note: "場地可用狀態參照「熱Hope行事曆」（兩廳院檔期）：\n🔵 音樂廳可用 ｜ 🟢 兩廳皆可\n戶外練舞請遵守音量管理規範，備妥充足飲水與更換舞鞋。",
+    googleMapsUrl: "https://maps.google.com/?q=國家音樂廳"
+  },
+  cksmh_theater: {
+    id: "cksmh_theater",
+    name: "中正紀念堂(戲劇院)",
+    shortName: "戲劇院側廣場",
+    tag: "戶外排舞 ｜ 戲劇院側",
+    icon: "🎭",
+    address: "台北市中正區中山南路21-1號（國家戲劇院側迴廊 / 藝文廣場）",
+    mrt: "中正紀念堂站（5號出口步行2分鐘，往戲劇院迴廊）",
+    doorbell: "戶外開放迴廊 / 戲劇院大階梯前平台",
+    phone: "02-3393-9888（兩廳院服務台）",
+    note: "場地可用狀態參照「熱Hope行事曆」（兩廳院檔期）：\n🟣 戲劇院可用 ｜ 🟢 兩廳皆可\n戶外練舞請遵守音量管理規範，備妥充足飲水與更換舞鞋。",
+    googleMapsUrl: "https://maps.google.com/?q=國家戲劇院"
   },
   cksmh: {
     id: "cksmh",
