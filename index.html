@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>熱舞社行事曆 Dance Club Schedule</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="theme-color" content="#0d0a1a" id="metaThemeColor">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="熱舞社行事曆">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="熱舞社練舞場地、週年慶典、演出服事行事曆">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=dance.1">
+  <style>
+    /* ===== 熱舞社主題色覆蓋 ===== */
+    :root {
+      --color-gathering: #a855f7;    /* 練舞 - 紫 */
+      --color-core:      #ec4899;    /* 週年 - 粉 */
+      --color-bethany:   #f59e0b;    /* 慶功 - 金 */
+      --color-angel:     #06b6d4;    /* 演出 - 青 */
+      --color-mustard:   #10b981;    /* 保留 */
+      --color-partner:   #f97316;    /* 保留 */
+      --color-accent:    #a855f7;
+    }
+    .dark-theme {
+      --bg-primary:   #0d0a1a;
+      --bg-secondary: #150f2a;
+      --bg-card:      #1a1030;
+      --bg-elevated:  #211540;
+    }
+    /* 品牌圖示換成舞蹈音符 */
+    .brand-icon svg { display: none; }
+    .brand-icon::before { content: "🕺"; font-size: 1.5rem; }
+
+    /* 熱舞社類別顏色點 */
+    .dot-practice    { background: #a855f7; }
+    .dot-anniversary { background: #ec4899; }
+    .dot-celebration { background: #f59e0b; }
+    .dot-performance { background: #06b6d4; }
+    .dot-tbd         { background: #6b7280; }
+
+    /* 類別標籤顏色 */
+    .badge-practice    { background: rgba(168,85,247,0.18); color: #c084fc; border-color: rgba(168,85,247,0.35); }
+    .badge-anniversary { background: rgba(236,72,153,0.18); color: #f472b6; border-color: rgba(236,72,153,0.35); }
+    .badge-celebration { background: rgba(245,158,11,0.18); color: #fbbf24; border-color: rgba(245,158,11,0.35); }
+    .badge-performance { background: rgba(6,182,212,0.18);  color: #22d3ee; border-color: rgba(6,182,212,0.35); }
+    .badge-tbd         { background: rgba(107,114,128,0.18); color: #9ca3af; border-color: rgba(107,114,128,0.35); }
+
+    /* 卡片左邊線 */
+    .event-card[data-category="practice"]    { border-left-color: #a855f7; }
+    .event-card[data-category="anniversary"] { border-left-color: #ec4899; }
+    .event-card[data-category="celebration"] { border-left-color: #f59e0b; }
+    .event-card[data-category="performance"] { border-left-color: #06b6d4; }
+
+    /* 地標資訊卡（支援多場地切換） */
+    .venue-info-card {
+      background: linear-gradient(135deg, rgba(168,85,247,0.08), rgba(236,72,153,0.08));
+      border: 1px solid rgba(168,85,247,0.25);
+      border-radius: 16px;
+      padding: 1.2rem 1.4rem;
+      margin: 1.2rem 0 0;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .venue-tab-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 0.75rem;
+    }
+    .venue-tab-header h4 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #c084fc;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .venue-tabs {
+      display: flex;
+      gap: 0.4rem;
+      background: rgba(0,0,0,0.25);
+      padding: 3px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .venue-tab-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted, #94a3b8);
+      padding: 0.4rem 0.8rem;
+      border-radius: 9px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+    }
+    .venue-tab-btn:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.05);
+    }
+    .venue-tab-btn.active {
+      color: #fff;
+      background: linear-gradient(135deg, rgba(168,85,247,0.85), rgba(236,72,153,0.85));
+      box-shadow: 0 4px 12px rgba(168,85,247,0.3);
+    }
+    .venue-tab-panel {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+    .venue-tab-panel.active {
+      display: block;
+    }
+    .venue-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(168,85,247,0.18);
+      color: #c084fc;
+      border: 1px solid rgba(168,85,247,0.35);
+      margin-bottom: 0.6rem;
+    }
+    .venue-badge-pill.cksmh {
+      background: rgba(16,185,129,0.18);
+      color: #34d399;
+      border-color: rgba(16,185,129,0.35);
+    }
+    .venue-info-card .venue-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+      margin-bottom: 0.25rem;
+    }
+    .venue-info-card .venue-icon {
+      flex-shrink: 0;
+      line-height: 1.6;
+    }
+    .venue-action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 0.85rem;
+      align-items: center;
+    }
+    .venue-map-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 1rem;
+      background: rgba(168,85,247,0.15);
+      border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 20px;
+      color: #c084fc;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .venue-map-link:hover {
+      background: rgba(168,85,247,0.3);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .venue-legend-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 0.9rem;
+      background: rgba(16,185,129,0.15);
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 20px;
+      color: #34d399;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .venue-legend-btn:hover {
+      background: rgba(16,185,129,0.28);
+      color: #fff;
+    }
+
+    /* 兩廳院檔期圖例面板 */
+    .cksmh-legend-box {
+      margin-top: 0.75rem;
+      padding: 0.85rem 1rem;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+    }
+    .cksmh-legend-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .cksmh-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.8rem;
+      padding: 0.35rem 0.6rem;
+      border-radius: 8px;
+    }
+
+    /* 快捷選填標籤 */
+    .quick-location-tags {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-top: 0.35rem;
+    }
+    .quick-loc-tag {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      color: var(--text-muted, #94a3b8);
+      padding: 0.2rem 0.6rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quick-loc-tag:hover {
+      background: rgba(168,85,247,0.2);
+      color: #c084fc;
+      border-color: rgba(168,85,247,0.4);
+    }
+
+    /* Mobile 優化 */
+    @media (max-width: 600px) {
+      .venue-tab-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .venue-tabs {
+        width: 100%;
+      }
+      .venue-tab-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 0.45rem 0.5rem;
+        font-size: 0.78rem;
+      }
+      .venue-info-card {
+        padding: 1rem;
+        border-radius: 14px;
+      }
+      .cksmh-legend-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 美化 glow 顏色 */
+    .glow-1 {
+      background: radial-gradient(ellipse at 30% 20%, rgba(168,85,247,0.22) 0%, transparent 65%);
+    }
+    .glow-2 {
+      background: radial-gradient(ellipse at 75% 80%, rgba(236,72,153,0.18) 0%, transparent 65%);
+    }
+  </style>
+</head>
+<body class="dark-theme">
+  <!-- Top Background Ambient Glow -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="badge-year" id="badgeYearText">DANCE CLUB SCHEDULE 🕺</div>
+          <h1 class="brand-title">熱舞社行事曆</h1>
+        </div>
+      </div>
+
+      <!-- Year Switcher Bar -->
+      <div class="year-switcher-container" id="yearSwitcherContainer">
+        <span class="year-switcher-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          年度
+        </span>
+        <div class="year-pills" id="yearSelector" role="group" aria-label="選擇行事曆年度">
+          <button type="button" class="year-pill active" data-year="2026">2026 年</button>
+          <button type="button" class="year-pill" data-year="2027">2027 年</button>
+          <button type="button" class="year-pill" data-year="all">全部</button>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Mobile Search Toggle Button -->
+        <button id="mobileSearchToggleBtn" class="btn btn-icon mobile-only" title="搜尋" aria-label="搜尋">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+        </button>
+
+        <!-- Search bar -->
+        <div class="search-box" id="searchBoxContainer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input type="text" id="searchInput" placeholder="搜尋練舞、演出、地點..." autocomplete="off">
+          <button id="clearSearchBtn" class="clear-btn" style="display:none;" aria-label="清除搜尋">&times;</button>
+        </div>
+
+        <button id="sheetSyncBtn" class="btn btn-secondary action-btn-text" title="從 Google 試算表同步最新資料">
+          <svg id="syncHeaderIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span class="btn-label">雲端同步</span>
+          <span id="syncStatusDot" class="status-indicator-dot dot-offline" title="目前狀態：本地資料"></span>
+        </button>
+        <button id="sheetConfigBtn" class="btn btn-icon" title="設定 Google 試算表雲端資料庫網址" aria-label="雲端設定">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+
+        <button id="exportIcsBtn" class="btn btn-secondary action-btn-text" title="下載 .ics 檔匯入 Google / Apple Calendar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span class="btn-label">匯出行事曆</span>
+        </button>
+
+        <button id="lineCopyModalBtn" class="btn btn-secondary action-btn-text" title="產生適合發送至 LINE 的文字通告">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          <span class="btn-label">LINE 通告</span>
+        </button>
+
+        <button id="printBtn" class="btn btn-secondary desktop-only" title="列印或另存為 PDF">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          <span class="btn-label">列印</span>
+        </button>
+
+        <button id="adminEditBtn" class="btn btn-accent action-btn-text" title="新增、編輯或刪除活動（簡易後台）">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          <span class="btn-label">編輯管理</span>
+        </button>
+
+        <!-- PWA Install Button -->
+        <button id="pwaInstallBtn" class="btn btn-primary btn-install-app" style="display:none;" title="安裝至手機或桌面主畫面">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+          <span>安裝 App</span>
+        </button>
+
+        <button id="themeToggleBtn" class="btn btn-icon" title="切換深淺模式" aria-label="切換主題">
+          <span id="themeIcon">🌙</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Stats Bar -->
+    <div class="stats-strip" id="statsStrip">
+      <div class="stat-pill"><span class="stat-num" id="statTotalEvents">0</span> 場活動</div>
+      <div class="stat-pill"><span class="stat-badge badge-practice" id="statGatheringCount">0</span> 次練舞</div>
+      <div class="stat-pill"><span class="stat-badge badge-anniversary" id="statCoreCount">0</span> 次週年慶</div>
+      <div class="stat-pill"><span class="stat-badge badge-celebration" id="statBethanyCount">0</span> 慶功宴</div>
+      <div class="stat-pill"><span class="stat-badge badge-performance" id="statAngelCount">0</span> 次演出</div>
+    </div>
+
+    <!-- View Switcher & Filters -->
+    <div class="nav-controls">
+      <!-- Views -->
+      <div class="view-tabs" role="tablist">
+        <button class="view-tab active" data-view="matrix">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          年度鳥瞰
+        </button>
+        <button class="view-tab" data-view="timeline">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+          時間軸清單
+        </button>
+        <button class="view-tab" data-view="calendar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          月曆視圖
+        </button>
+        <button class="view-tab" data-view="ministry">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          活動分類
+        </button>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="category-filters" id="categoryFilters">
+        <button class="filter-pill active" data-category="all">全部活動</button>
+        <button class="filter-pill" data-category="practice">🕺 練舞場地</button>
+        <button class="filter-pill" data-category="anniversary">🎉 週年慶典</button>
+        <button class="filter-pill" data-category="celebration">🥂 慶功宴</button>
+        <button class="filter-pill" data-category="performance">🎤 演出服事</button>
+        <button class="filter-pill" data-category="tbd">待確認</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-content">
+
+    <!-- Active Filter Notice -->
+    <div id="filterNotice" class="filter-notice" style="display:none;">
+      <span>目前篩選條件已啟動</span>
+      <button id="resetFilterBtn" class="btn-text">清除篩選</button>
+    </div>
+
+    <!-- VIEW 1: 12-Month Matrix View -->
+    <section id="matrixView" class="view-section active">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title" id="matrixViewTitle">年度行事曆全景鳥瞰</h2>
+          <p class="view-subtitle" id="matrixViewSubtitle">快速掌握各月份練舞、演出、慶典安排</p>
+        </div>
+        <div class="matrix-legend">
+          <span class="legend-dot dot-practice"></span> 練舞
+          <span class="legend-dot dot-anniversary"></span> 週年慶
+          <span class="legend-dot dot-celebration"></span> 慶功宴
+          <span class="legend-dot dot-performance"></span> 演出
+        </div>
+      </div>
+      <!-- Quick Month Jump Strip -->
+      <div class="matrix-month-chips" id="matrixMonthChips" aria-label="月份快速跳轉"></div>
+      <div class="matrix-grid" id="matrixGrid">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- 場地速查資訊卡 (支援 美恩工作室 & 中正紀念堂廣場 雙場地切換) -->
+      <div class="venue-info-card">
+        <div class="venue-tab-header">
+          <h4>📍 練舞與活動場地指南</h4>
+          <div class="venue-tabs" role="tablist">
+            <button type="button" class="venue-tab-btn active" id="tabBtnMeien" data-venue-target="venue-panel-meien">
+              🏠 美恩工作室
+            </button>
+            <button type="button" class="venue-tab-btn" id="tabBtnCksmh" data-venue-target="venue-panel-cksmh">
+              🏛️ 中正紀念堂廣場
+            </button>
+          </div>
+        </div>
+
+        <!-- 場地 1: 美恩工作室 -->
+        <div id="venue-panel-meien" class="venue-tab-panel active">
+          <div class="venue-badge-pill">室內常態練舞</div>
+          <div class="venue-row"><span class="venue-icon">🚇</span><span><strong>捷運：</strong>善導寺站（二號出口無電梯 / 三號出口有電梯）</span></div>
+          <div class="venue-row"><span class="venue-icon">🏠</span><span><strong>地址：</strong>台北市青島東路四號七樓之三</span></div>
+          <div class="venue-row"><span class="venue-icon">🔔</span><span><strong>門鈴：</strong>73# &nbsp;|&nbsp; <strong>電話：</strong>0975729815</span></div>
+          <div class="venue-row"><span class="venue-icon">⚠️</span><span><strong>重要叮嚀：</strong>是「<strong>青島門市</strong>」！人多會誤走去「千成門市」，請留意路標</span></div>
+          <div class="venue-row"><span class="venue-icon">🔍</span><span><strong>路線指引：</strong>Google 搜尋「富邦來來華夏」或「7-11青島門市」→ 找二號門 → 按 73#</span></div>
+          <div class="venue-action-row">
+            <a class="venue-map-link" href="https://maps.google.com/?q=台北市青島東路四號七樓之三" target="_blank" rel="noopener">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              Google Maps 導航
+            </a>
+          </div>
+        </div>
+
+        <!-- 場地 2: 中正紀念堂廣場 -->
+        <div id="venue-panel-cksmh" class="venue-tab-panel">
+          <div class="venue-badge-pill cksmh">戶外大隊排舞 ｜ 兩廳院檔期</div>
+          <div class="venue-row"><span class="venue-icon">🚇</span><span><strong>捷運：</strong>中正紀念堂站（5 號出口步行 1 分鐘，直達兩廳院藝文廣場）</span></div>
+          <div class="venue-row"><span class="venue-icon">🏛️</span><span><strong>地址：</strong>台北市中正區中山南路21-1號（國家兩廳院）</span></div>
+          <div class="venue-row"><span class="venue-icon">🎭</span><span><strong>場地區域：</strong>國家音樂廳側廣場 / 國家戲劇院側廣場 / 民主大道</span></div>
+          <div class="venue-row"><span class="venue-icon">📋</span><span><strong>可用檔期狀態（參照 熱Hope行事曆）：</strong></span></div>
+          
+          <!-- 檔期狀態圖例說明 -->
+          <div class="cksmh-legend-box">
+            <div style="font-weight: 700; color: #34d399; font-size: 0.85rem; margin-bottom: 0.35rem;">兩廳院廣場借用檔期對照說明：</div>
+            <div class="cksmh-legend-grid">
+              <div class="cksmh-legend-item" style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #34d399;">
+                <span>🟢</span><strong>兩廳皆可</strong>：音樂廳與戲劇院廣場均可使用，最適合大隊排舞
+              </div>
+              <div class="cksmh-legend-item" style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #60a5fa;">
+                <span>🔵</span><strong>音樂廳</strong>：僅音樂廳側廣場可用
+              </div>
+              <div class="cksmh-legend-item" style="background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #c084fc;">
+                <span>🟣</span><strong>戲劇院</strong>：僅戲劇院側廣場可用
+              </div>
+              <div class="cksmh-legend-item" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171;">
+                <span>🔴</span><strong>兩廳皆不可</strong>：有大型演出或專案檔期，不開放借用
+              </div>
+            </div>
+          </div>
+
+          <div class="venue-row" style="margin-top: 0.6rem;"><span class="venue-icon">🎒</span><span><strong>練舞叮嚀：</strong>請遵守戶外音量規範（建議耳機或攜帶中小型音響），備妥充足飲用水、毛巾與更換舞鞋。</span></div>
+          <div class="venue-action-row">
+            <a class="venue-map-link" href="https://maps.google.com/?q=中正紀念堂兩廳院藝文廣場" target="_blank" rel="noopener">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              Google Maps 導航
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: Timeline View -->
+    <section id="timelineView" class="view-section">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title" id="timelineViewTitle">詳細時間軸日程</h2>
+          <p class="view-subtitle" id="timelineViewSubtitle">依時間順序呈現每場練舞、演出、慶典資訊</p>
+        </div>
+        <div class="timeline-sort-actions">
+          <span id="timelineCountText" class="count-badge">顯示 0 個行程</span>
+        </div>
+      </div>
+      <div class="timeline-container" id="timelineContainer">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- VIEW 3: Calendar Grid View -->
+    <section id="calendarView" class="view-section">
+      <div class="view-header calendar-nav">
+        <div class="month-selector-group">
+          <button id="prevMonthBtn" class="btn btn-icon btn-month-nav" aria-label="上個月">&larr;</button>
+          <h2 id="calendarMonthTitle" class="calendar-current-month">2026 年 11 月</h2>
+          <button id="nextMonthBtn" class="btn btn-icon btn-month-nav" aria-label="下個月">&rarr;</button>
+        </div>
+        <div class="month-quick-select" id="monthQuickSelect">
+          <!-- 1-12 month chips rendered by JS -->
+        </div>
+      </div>
+      <div class="calendar-card">
+        <div class="calendar-weekdays">
+          <div><span class="weekday-full">週日 (Sun)</span><span class="weekday-short">日</span></div>
+          <div><span class="weekday-full">週一 (Mon)</span><span class="weekday-short">一</span></div>
+          <div><span class="weekday-full">週二 (Tue)</span><span class="weekday-short">二</span></div>
+          <div><span class="weekday-full">週三 (Wed)</span><span class="weekday-short">三</span></div>
+          <div><span class="weekday-full">週四 (Thu)</span><span class="weekday-short">四</span></div>
+          <div><span class="weekday-full">週五 (Fri)</span><span class="weekday-short">五</span></div>
+          <div><span class="weekday-full">週六 (Sat)</span><span class="weekday-short">六</span></div>
+        </div>
+        <div class="calendar-days-grid" id="calendarDaysGrid">
+          <!-- Days rendered by JS -->
+        </div>
+      </div>
+      <div class="calendar-sidebar-details" id="calendarDayDetails" style="display:none;">
+        <h3 id="selectedDateTitle">選取日期活動</h3>
+        <div id="selectedDateEventsList"></div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: Ministry / Category View -->
+    <section id="ministryView" class="view-section">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">活動分類總覽</h2>
+          <p class="view-subtitle">依練舞、演出、慶典分類，一眼看清全年活動</p>
+        </div>
+      </div>
+      <div class="ministry-grid" id="ministryGrid">
+        <!-- Ministry overview cards rendered by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal for Event Details -->
+  <div id="eventModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-drag-handle"></div>
+      <div class="modal-header">
+        <span class="modal-category-badge" id="modalCategoryBadge">類別</span>
+        <button id="closeModalBtn" class="btn-close" aria-label="關閉">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h2 id="modalTitle" class="modal-title">活動名稱</h2>
+        <div class="modal-meta-grid">
+          <div class="modal-meta-item">
+            <span class="meta-icon">📅</span>
+            <div>
+              <div class="meta-label">日期與星期</div>
+              <div class="meta-value" id="modalDate">2026/11/05 (四)</div>
+            </div>
+          </div>
+          <div class="modal-meta-item">
+            <span class="meta-icon">⏰</span>
+            <div>
+              <div class="meta-label">時間</div>
+              <div class="meta-value" id="modalTime">待確認</div>
+            </div>
+          </div>
+          <div class="modal-meta-item full-width">
+            <span class="meta-icon">📍</span>
+            <div>
+              <div class="meta-label">地點</div>
+              <div class="meta-value" id="modalLocation">美恩工作室</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Topic or Highlight section -->
+        <div class="modal-section" id="modalTopicSection" style="display:none;">
+          <h4>🎵 主題</h4>
+          <p id="modalTopicText"></p>
+        </div>
+
+        <!-- Description and Details -->
+        <div class="modal-section" id="modalDescSection">
+          <h4>📋 詳細說明</h4>
+          <div id="modalDescContent" class="modal-desc-content"></div>
+        </div>
+
+        <!-- Needs & Requirements -->
+        <div class="modal-section" id="modalNeedsSection" style="display:none;">
+          <h4>🤝 出席需求 / 攜帶物品</h4>
+          <div id="modalNeedsContent"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a id="modalMapLink" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          地圖導航
+        </a>
+        <a id="modalGoogleCalLink" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" title="直接在 Google 日曆 App 中開啟">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          Google 日曆
+        </a>
+        <button id="modalShareBtn" class="btn btn-secondary mobile-only" title="手機原生分享">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+          分享
+        </button>
+        <button id="modalCopyBtn" class="btn btn-secondary desktop-only" title="複製活動通告至剪貼簿">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          複製通告
+        </button>
+        <button id="modalEditBtn" class="btn btn-secondary" title="直接修改此活動內容">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          編輯此活動
+        </button>
+        <button id="modalDuplicateBtn" class="btn btn-secondary" title="以此活動為範本複製新增活動">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          複製活動
+        </button>
+        <button id="modalSingleIcsBtn" class="btn btn-primary" title="下載 .ics 檔至 Apple / 手機行事曆">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          加到行事曆 (.ics)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for LINE Copy Package -->
+  <div id="lineModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card wide-card">
+      <div class="modal-drag-handle"></div>
+      <div class="modal-header">
+        <h3 class="modal-title">💬 LINE 群組通告文案產生器</h3>
+        <button id="closeLineModalBtn" class="btn-close" aria-label="關閉">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-hint">已為社員排版好適合在 LINE 群組轉貼的清晰文字包，點擊下方即可直接分享或複製！</p>
+        <div class="line-tabs">
+          <button class="line-tab active" data-tab="year-summary">全部行程總表</button>
+          <button class="line-tab" data-tab="bethany-series">練舞場地清單</button>
+          <button class="line-tab" data-tab="angel-series">演出服事行程</button>
+          <button class="line-tab" data-tab="q1">11 月行程</button>
+          <button class="line-tab" data-tab="q2">12 月行程</button>
+        </div>
+        <textarea id="lineTextOutput" class="line-textarea" readonly rows="12"></textarea>
+      </div>
+      <div class="modal-footer">
+        <span id="lineCopySuccessNotice" class="copy-success" style="display:none;">✅ 已成功複製到剪貼簿！</span>
+        <button id="shareLineBtn" class="btn btn-secondary mobile-only" title="以手機原生分享至 LINE / 訊息">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+          直接分享至 LINE
+        </button>
+        <button id="copyLineTextBtn" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          一鍵複製全部文字
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for iOS Add to Home Screen Guide -->
+  <div id="iosInstallModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-drag-handle"></div>
+      <div class="modal-header">
+        <h3 class="modal-title">📲 加入手機主畫面 (像 App 一樣使用)</h3>
+        <button id="closeIosModalBtn" class="btn-close" aria-label="關閉">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-hint" style="margin-bottom:1rem;">將熱舞社行事曆安裝到手機主畫面，隨時查看練舞場地與演出資訊！</p>
+        <div class="ios-install-steps">
+          <div class="ios-step-item">
+            <div class="ios-step-num">1</div>
+            <div class="ios-step-text">點擊手機瀏覽器底部的 <strong>「分享按鈕」</strong>（帶有向上箭頭的方框）</div>
+          </div>
+          <div class="ios-step-item">
+            <div class="ios-step-num">2</div>
+            <div class="ios-step-text">在選單中向下滑動，找到並點選 <strong>「加入主畫面 ➕」</strong></div>
+          </div>
+          <div class="ios-step-item">
+            <div class="ios-step-num">3</div>
+            <div class="ios-step-text">右上角點擊 <strong>「新增」</strong>，即可在手機桌面隨時點開使用！</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="confirmIosModalBtn" class="btn btn-primary" style="width:100%;">我知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Edit Manager Modal -->
+  <div id="adminModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card admin-modal-card">
+      <div class="modal-drag-handle"></div>
+      <div class="modal-header">
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+          <div class="sheet-icon-badge">✏️</div>
+          <h3 class="modal-title">行事曆編輯管理後台</h3>
+        </div>
+        <button id="closeAdminModalBtn" class="btn-close" aria-label="關閉">&times;</button>
+      </div>
+
+      <!-- Admin Tab Bar -->
+      <div class="admin-tab-bar">
+        <button class="admin-tab active" data-admin-tab="list">📋 活動列表</button>
+        <button class="admin-tab" data-admin-tab="add">➕ 新增活動</button>
+        <button class="admin-tab" data-admin-tab="export">📤 匯出 / 同步</button>
+      </div>
+
+      <!-- Tab: List -->
+      <div class="admin-panel" id="adminPanelList">
+        <div class="admin-list-toolbar">
+          <input type="text" id="adminSearchInput" class="admin-search" placeholder="搜尋活動名稱、地點...">
+          <select id="adminCategoryFilter" class="admin-filter-select">
+            <option value="all">全部類別</option>
+            <option value="practice">練舞場地</option>
+            <option value="anniversary">週年慶典</option>
+            <option value="celebration">慶功宴</option>
+            <option value="performance">演出服事</option>
+            <option value="tbd">待定</option>
+          </select>
+        </div>
+        <div id="adminEventList" class="admin-event-list"></div>
+      </div>
+
+      <!-- Tab: Add / Edit -->
+      <div class="admin-panel" id="adminPanelAdd" style="display:none;">
+        <form id="adminEventForm" class="admin-form" autocomplete="off">
+          <input type="hidden" id="editEventId">
+          <div class="admin-form-grid">
+            <div class="admin-form-group full-width">
+              <label class="admin-label">活動標題 *</label>
+              <input type="text" id="ef-title" class="admin-input" placeholder="例：練舞 — 美恩家 (11/5)" required>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-label">類別 *</label>
+              <select id="ef-category" class="admin-input">
+                <option value="practice">練舞場地</option>
+                <option value="anniversary">週年慶典</option>
+                <option value="celebration">慶功宴</option>
+                <option value="performance">演出服事</option>
+                <option value="tbd">待定</option>
+              </select>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-label">狀態</label>
+              <select id="ef-status" class="admin-input">
+                <option value="confirmed">已確認</option>
+                <option value="tentative">暫定</option>
+                <option value="cancelled">已取消</option>
+              </select>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-label">日期 *</label>
+              <input type="date" id="ef-date" class="admin-input" required>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-label">時間</label>
+              <input type="text" id="ef-time" class="admin-input" placeholder="例：7:00 PM - 9:30 PM">
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-label">地點 *</label>
+              <input type="text" id="ef-location" class="admin-input" placeholder="例：美恩工作室" required>
+              <div class="quick-location-tags">
+                <button type="button" class="quick-loc-tag" data-loc="美恩工作室" data-url="https://maps.google.com/?q=台北市青島東路四號七樓之三">🏠 美恩家</button>
+                <button type="button" class="quick-loc-tag" data-loc="中正紀念堂廣場" data-url="https://maps.google.com/?q=中正紀念堂兩廳院藝文廣場">🏛️ 中正紀念堂廣場</button>
+                <button type="button" class="quick-loc-tag" data-loc="副堂" data-url="">⛪ 副堂</button>
+              </div>
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-label">地圖連結</label>
+              <input type="url" id="ef-locationUrl" class="admin-input" placeholder="https://maps.google.com/...">
+            </div>
+            <div class="admin-form-group full-width">
+              <label class="admin-label">主題</label>
+              <input type="text" id="ef-topic" class="admin-input" placeholder="例：定期練舞、週年表演...">
+            </div>
+            <div class="admin-form-group full-width">
+              <label class="admin-label">活動描述</label>
+              <textarea id="ef-description" class="admin-textarea" rows="3" placeholder="簡述活動內容..."></textarea>
+            </div>
+            <div class="admin-form-group full-width">
+              <label class="admin-label">出席需求</label>
+              <input type="text" id="ef-needs" class="admin-input" placeholder="例：全體舞者出席">
+            </div>
+            <div class="admin-form-group full-width">
+              <label class="admin-label">請攜帶</label>
+              <input type="text" id="ef-itemsToBring" class="admin-input" placeholder="例：換鞋、水瓶、練舞服">
+            </div>
+          </div>
+          <div class="admin-form-actions">
+            <button type="button" id="adminCancelEditBtn" class="btn btn-secondary">取消</button>
+            <button type="submit" id="adminSaveEventBtn" class="btn btn-primary">💾 儲存活動</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tab: Export -->
+      <div class="admin-panel" id="adminPanelExport" style="display:none;">
+        <div class="admin-export-guide">
+          <div class="export-step-card highlight-card" style="border:1px solid rgba(168,85,247,0.3);background:rgba(168,85,247,0.06);">
+            <div class="export-step-num" style="background:var(--color-gathering);color:#fff;">⚡</div>
+            <div>
+              <strong>方式 A：一鍵推送到 Google Sheets (推薦)</strong>
+              <p>使用 Google Apps Script (Web App) API，只要點擊下方按鈕，就能直接把所有更新即時寫入雲端試算表！</p>
+              <div style="display:flex;gap:0.6rem;align-items:center;margin-top:0.6rem;flex-wrap:wrap;">
+                <button id="adminPushToSheetBtn" class="btn btn-primary" title="將目前所有活動寫入 Google Sheets">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  即刻推送到 Google 試算表
+                </button>
+                <button id="adminConfigSheetBtn" class="btn btn-secondary" title="檢查或設定 API 網址">
+                  ⚙️ 檢查連線設定
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="export-step-card">
+            <div class="export-step-num">B</div>
+            <div>
+              <strong>方式 B：下載 CSV 覆蓋試算表</strong>
+              <p>可下載標準 UTF-8 CSV 檔案，在 Google 試算表點選「檔案 → 匯入 → 取代試算表」。</p>
+              <button id="adminExportCsvBtn" class="btn btn-secondary" style="margin-top:0.5rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                匯出 CSV 檔案
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-export-info">
+            <span>目前共 <strong id="adminEventCount">0</strong> 筆活動 &nbsp;|&nbsp; 狀態：<span id="adminSyncStatusLabel">本地離線資料</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Confirm Delete Dialog -->
+  <div id="deleteConfirmDialog" class="delete-confirm-overlay" style="display:none;">
+    <div class="delete-confirm-card">
+      <div class="delete-confirm-icon">🗑️</div>
+      <h4>確定要刪除這個活動嗎？</h4>
+      <p id="deleteConfirmName" class="delete-confirm-name"></p>
+      <div class="delete-confirm-actions">
+        <button id="deleteCancelBtn" class="btn btn-secondary">取消</button>
+        <button id="deleteConfirmBtn" class="btn btn-danger">確認刪除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Google Sheets Sync -->
+  <div id="sheetModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card wide-card">
+      <div class="modal-drag-handle"></div>
+      <div class="modal-header">
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+          <div class="sheet-icon-badge">📊</div>
+          <h3 class="modal-title">Google Sheets 雲端資料庫雙向同步</h3>
+        </div>
+        <button id="closeSheetModalBtn" class="btn-close" aria-label="關閉">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="sync-status-card">
+          <div class="sync-status-header">
+            <div class="sync-status-info">
+              <span id="sheetCurrentStatusDot" class="status-indicator-dot dot-offline"></span>
+              <strong id="sheetCurrentStatusText">目前使用：本地預設資料 (離線模式)</strong>
+            </div>
+            <span id="sheetLastSyncTime" class="sync-time-badge">尚未連接雲端</span>
+          </div>
+          <p class="sync-status-desc" id="sheetStatusDesc">
+            支援 <strong>Google Apps Script (Web App) API</strong>，支援雙向讀寫！
+          </p>
+        </div>
+        <div class="sheet-form-group">
+          <label for="sheetUrlInput" class="sheet-form-label">
+            <strong>Google Apps Script (Web App API) 或 試算表發布網址</strong>
+          </label>
+          <div class="sheet-input-wrapper">
+            <input type="url" id="sheetUrlInput" class="sheet-url-input" value="" placeholder="https://script.google.com/macros/s/AKfycb.../exec" spellcheck="false" autocomplete="off">
+          </div>
+          <div style="display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap;">
+            <button id="testSheetSyncBtn" class="btn btn-primary" title="從 Google 試算表拉取最新活動">
+              <svg id="syncIconSpin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+              </svg>
+              <span>⬇️ 從雲端拉取 (Pull)</span>
+            </button>
+            <button id="sheetPushBtn" class="btn btn-secondary" title="將本地最新修改推送到 Google 試算表">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>⬆️ 推送到雲端 (Push)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <button id="resetSheetBtn" class="btn btn-secondary" title="清除雲端設定，還原為初始本地資料" style="color:var(--color-danger, #ef4444);">
+            還原預設
+          </button>
+        </div>
+        <button id="saveAndSyncSheetBtn" class="btn btn-primary">
+          💾 儲存網址設定
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">訊息已複製</div>
+
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p><strong>🕺 熱舞社行事曆 Dance Club Schedule</strong> ｜ 一起跳出最棒的舞台！</p>
+      <p class="footer-hint">提示：支援離線查閱、支援匯出行事曆 .ics 檔至手機、支援友善列印 A4</p>
+    </div>
+  </footer>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="手機快捷導航">
+    <button class="bottom-nav-item active" data-view="matrix">
+      <div class="bottom-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+      </div>
+      <span class="bottom-nav-label">鳥瞰矩陣</span>
+    </button>
+    <button class="bottom-nav-item" data-view="timeline">
+      <div class="bottom-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+      </div>
+      <span class="bottom-nav-label">日程清單</span>
+    </button>
+    <button class="bottom-nav-item" data-view="calendar">
+      <div class="bottom-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      </div>
+      <span class="bottom-nav-label">月曆視圖</span>
+    </button>
+    <button class="bottom-nav-item" data-view="ministry">
+      <div class="bottom-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      </div>
+      <span class="bottom-nav-label">活動分類</span>
+    </button>
+  </nav>
+
+  <script src="events-data.js?v=dance.1"></script>
+  <script src="app.js?v=dance.1"></script>
+</body>
+</html>

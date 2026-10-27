@@ -1,0 +1,19 @@
+{
+  "name": "熱舞社行事曆 Dance Club Schedule",
+  "short_name": "熱舞社行事曆",
+  "description": "熱舞社練舞場地、週年慶典、演出服事行事曆",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d0a1a",
+  "theme_color": "#0d0a1a",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"]
+}
