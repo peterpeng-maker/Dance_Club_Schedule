@@ -13,11 +13,25 @@ document.addEventListener("DOMContentLoaded", () => {
     "1月 (Jan)", "2月 (Feb)", "3月 (Mar)", "4月 (Apr)", "5月 (May)", "6月 (Jun)",
     "7月 (Jul)", "8月 (Aug)", "9月 (Sep)", "10月 (Oct)", "11月 (Nov)", "12月 (Dec)"
   ];
-  const DEFAULT_GAS_URL = "";
+  const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbyw1nMs5D5glmsLfoXRwlySI2-wskH8423CAgDsYAENEp6e5SsG0YIQpkz-5nkk4IED/exec";
   const STORAGE_CUSTOM_EVENTS = "dance_club_custom_events_2026";
+  // 版本號：更新時自動清除舊快取，確保新行程（如 2027 年）立即顯示
+  const DATA_VERSION = "dance.3";
+  const STORAGE_DATA_VERSION = "dance_club_data_version";
+
+  // 清除舊版本快取，確保 2027 年新行程可以正常載入
+  const storedDataVersion = localStorage.getItem(STORAGE_DATA_VERSION);
+  if (storedDataVersion !== DATA_VERSION) {
+    localStorage.removeItem("dance_club_sheet_cache_2026");
+    localStorage.removeItem("dance_club_sheet_cache");
+    localStorage.removeItem(STORAGE_CUSTOM_EVENTS);
+    localStorage.setItem(STORAGE_DATA_VERSION, DATA_VERSION);
+    console.log("[Dance Club] 資料版本更新至", DATA_VERSION, "，已清除舊快取，載入最新行程");
+  }
+
   let appEvents = Array.isArray(window.EVENTS_DATA) ? [...window.EVENTS_DATA] : [];
 
-  // Load custom local saved events if available (merging with official defaults so new 2026 events won't be lost)
+  // Load custom local saved events if available (merging with official defaults so new 2026/2027 events won't be lost)
   const savedCustom = localStorage.getItem(STORAGE_CUSTOM_EVENTS);
   if (savedCustom) {
     try {
@@ -31,6 +45,13 @@ document.addEventListener("DOMContentLoaded", () => {
       console.warn("Failed to parse saved custom events", e);
     }
   }
+
+  // 強制統一所有練習行程時間為 7:30PM-9:30PM（無論快取內容為何）
+  appEvents.forEach(e => {
+    if (e.category === "practice" || (e.title && e.title.includes("練舞"))) {
+      e.time = "7:30PM-9:30PM";
+    }
+  });
 
   // DOM Elements
   const badgeYearText = document.getElementById("badgeYearText");
@@ -125,8 +146,17 @@ document.addEventListener("DOMContentLoaded", () => {
         matchesYear = evt.date.startsWith(selectedYear + "-");
       }
 
-      // Category filter
-      const matchesCategory = (currentCategory === "all") || (evt.category === currentCategory);
+      // Category & Venue filter
+      let matchesCategory = true;
+      if (currentCategory !== "all") {
+        if (currentCategory === "cksmh_concert") {
+          matchesCategory = (evt.location && evt.location.includes("音樂廳")) || (evt.title && evt.title.includes("音樂廳"));
+        } else if (currentCategory === "cksmh_theater") {
+          matchesCategory = (evt.location && evt.location.includes("戲劇院")) || (evt.title && evt.title.includes("戲劇院"));
+        } else {
+          matchesCategory = (evt.category === currentCategory);
+        }
+      }
       
       // Search query filter
       let matchesSearch = true;
@@ -180,7 +210,10 @@ document.addEventListener("DOMContentLoaded", () => {
         filterText += `[跨年度 (全部)] `;
       }
       if (currentCategory !== "all") {
-        filterText += `[${CATEGORY_MAP[currentCategory]?.label || currentCategory}] `;
+        let catLabel = CATEGORY_MAP[currentCategory]?.label;
+        if (currentCategory === "cksmh_concert") catLabel = "中正紀念堂(音樂廳)";
+        else if (currentCategory === "cksmh_theater") catLabel = "中正紀念堂(戲劇院)";
+        filterText += `[${catLabel || currentCategory}] `;
       }
       if (searchQuery.trim() !== "") {
         filterText += `關鍵字 "${searchQuery}" `;
@@ -996,7 +1029,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const text = lineTextOutput.value;
       if (navigator.share) {
         navigator.share({
-          title: "2027 外展服事通告",
+          title: "熱舞社行事曆通告",
           text: text
         }).catch(() => {});
       } else {
@@ -1070,20 +1103,47 @@ document.addEventListener("DOMContentLoaded", () => {
 • 有服事演出需求將即時公佈演出曲目、服裝與彩排時間！`;
     } else if (type === "q1") {
       text = `🕺【熱舞社 11 月練舞與活動行程】
-• 11/05 (四) 練舞 — 美恩家 (善導寺站)
-• 11/13 (五) 🎉 熱舞社二週年（副堂）
-• 11/20 (五) 練舞 — 美恩家 (善導寺站)
+⏰ 時間：每週五 7:30PM - 9:30PM
+• 11/05 (四) 7:30PM-9:30PM 練舞 — 美恩家 (善導寺站)
+• 11/13 (五) 7:30PM-9:30PM 🎉 熱舞社二週年（副堂）
+• 11/20 (五) 7:30PM-9:30PM 練舞 — 美恩家 (善導寺站)
 
 📍 練舞地點：美恩工作室（台北市青島東路四號七樓之三，門鈴 73#）
 💡 請大家準時出席，備妥換鞋與練舞服！`;
     } else if (type === "q2") {
       text = `🕺【熱舞社 12 月練舞與活動行程】
-• 12/04 (五) 練舞 — 美恩家 (善導寺站)
-• 12/11 (五) 🥂 美恩家慶功宴
-• 12/18 (五) 練舞 — 美恩家 (善導寺站)
+⏰ 時間：每週五 7:30PM - 9:30PM
+• 12/04 (五) 7:30PM-9:30PM 練舞 — 美恩家 (善導寺站)
+• 12/11 (五) 7:30PM-9:30PM 🥂 美恩家慶功宴
+• 12/18 (五) 7:30PM-9:30PM 練舞 — 美恩家 (善導寺站)
 
 📍 地點：美恩工作室（台北市青島東路四號七樓之三，門鈴 73#）
 🎊 12/11 慶功宴歡迎大家帶點心一起慶祝！`;
+    } else if (type === "y27m1") {
+      text = `🏛️【熱舞社 2027年 1 月練舞行程 — 中正紀念堂(音樂廳)】
+⏰ 練舞時間：每週五 7:30PM - 9:30PM
+• 01/08 (五) 7:30PM-9:30PM 練舞 — 中正紀念堂(音樂廳)
+• 01/15 (五) 7:30PM-9:30PM 練舞 — 中正紀念堂(音樂廳)
+• 01/22 (五) 7:30PM-9:30PM 練舞 — 中正紀念堂(音樂廳)
+• 01/29 (五) 7:30PM-9:30PM 練舞 — 中正紀念堂(音樂廳)
+
+📍 集合地點：中正紀念堂(國家音樂廳) 側迴廊/藝文廣場
+🚇 捷運：中正紀念堂站 5 號出口步行 1 分鐘
+🗺️ 導航：https://maps.google.com/?q=國家音樂廳
+🎒 攜帶物品：更換舞鞋、充足飲水、毛巾、練舞服
+⚠️ 注意事項：戶外練舞請注意音量管制，請夥伴準時到場集合！`;
+    } else if (type === "y27m2") {
+      text = `🎭【熱舞社 2027年 2 月練舞行程 — 中正紀念堂(戲劇院)】
+⏰ 練舞時間：每週五 7:30PM - 9:30PM
+• 02/12 (五) 7:30PM-9:30PM 練舞 — 中正紀念堂(戲劇院)
+• 02/19 (五) 7:30PM-9:30PM 練舞 — 中正紀念堂(戲劇院)
+• 02/26 (五) 7:30PM-9:30PM 練舞 — 中正紀念堂(戲劇院)
+
+📍 集合地點：中正紀念堂(國家戲劇院) 側迴廊/藝文廣場
+🚇 捷運：中正紀念堂站 5 號出口步行 2 分鐘（愛國東路側）
+🗺️ 導航：https://maps.google.com/?q=國家戲劇院
+🎒 攜帶物品：更換舞鞋、充足飲水、毛巾、練舞服
+⚠️ 注意事項：戶外練舞請注意音量管制，請夥伴準時到場集合！`;
     }
 
     lineTextOutput.value = text;
@@ -1451,7 +1511,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const adminSyncStatusLabel = document.getElementById("adminSyncStatusLabel");
 
   const GAS_SCRIPT_CODE = `/**
- * 2027 年度服事行事曆 - Google Apps Script (Web App) API 接收端
+ * 熱舞社行事曆 - Google Apps Script (Web App) API 接收端
  * 部署設定：【網頁應用程式】➔ 誰可以存取設為【所有人 (Anyone)】
  */
 var HEADERS = ["id","category","categoryName","title","date","time","dayOfWeek","month","location","locationUrl","topic","description","needs","itemsToBring","status"];
@@ -1545,7 +1605,7 @@ function setupSheet() {
 
   function initGoogleSheetIntegration() {
     let savedUrl = localStorage.getItem(STORAGE_SHEET_URL);
-    // Automatically apply user deployed Apps Script API if not set or outdated
+    // 自動預設綁定 Apps Script Web App（如未設定或為舊版佔位符則自動套用）
     if (!savedUrl || savedUrl.trim() === "" || savedUrl.includes("AKfycb...") || !savedUrl.startsWith("https://script.google.com")) {
       savedUrl = DEFAULT_GAS_URL;
       localStorage.setItem(STORAGE_SHEET_URL, DEFAULT_GAS_URL);
@@ -1567,6 +1627,12 @@ function setupSheet() {
           console.error("Failed to parse cached sheet data", e);
         }
       }
+      // 強制統一所有練習行程時間為 7:30PM-9:30PM
+      appEvents.forEach(e => {
+        if (e.category === "practice" || (e.title && e.title.includes("練舞"))) {
+          e.time = "7:30PM-9:30PM";
+        }
+      });
       const isGas = savedUrl.includes("script.google.com");
       updateSyncStatusUI(isGas ? "online-api" : "online-csv", lastSync, appEvents.length);
       // Auto refresh in background
@@ -1926,8 +1992,14 @@ function setupSheet() {
       }
 
       if (newEvents.length === 0) {
-        if (!isSilent) {
-          if (confirm("雲端試算表目前為空（尚無任何活動資料）。\n\n是否立即將目前的 53 筆活動推送到 Google 試算表？")) {
+        // 試算表為空 — 自動推送本機資料
+        if (isSilent) {
+          // 頁面載入時靜默自動推送（試算表剛建立尚無資料）
+          console.log("[Dance Club] 試算表為空，自動推送本機資料至雲端...");
+          await pushToGoogleSheets(url, true);
+          return;
+        } else {
+          if (confirm(`雲端試算表目前為空（尚無任何活動資料）。\n\n是否立即將目前的 ${appEvents.length} 筆活動推送到 Google 試算表？`)) {
             await pushToGoogleSheets(url, false);
             return;
           }
@@ -1938,6 +2010,16 @@ function setupSheet() {
       // Merge with official default events so 2026/2027 defaults are not lost
       const sheetIds = new Set(newEvents.map(e => e.id));
       const missingDefaults = (window.EVENTS_DATA || []).filter(e => !sheetIds.has(e.id));
+      // 若 Sheet 裡的 time 是「待確認」或空，以本機 events-data.js 的值補回
+      const localEventMap = {};
+      (window.EVENTS_DATA || []).forEach(e => { localEventMap[e.id] = e; });
+      newEvents.forEach(e => {
+        if (!e.time || e.time === "待確認" || e.time === "時間待定") {
+          if (localEventMap[e.id] && localEventMap[e.id].time) {
+            e.time = localEventMap[e.id].time;
+          }
+        }
+      });
       appEvents = [...newEvents, ...missingDefaults];
       const now = new Date().toISOString();
       localStorage.setItem(STORAGE_SHEET_URL, url);
@@ -2172,7 +2254,10 @@ function setupSheet() {
     function resetAdminForm() {
       if (adminEventForm) adminEventForm.reset();
       if (editEventId) editEventId.value = "";
-      if (efCategory) efCategory.value = "gathering";
+      if (efCategory) efCategory.value = "practice";
+      if (efTime) efTime.value = "7:30PM-9:30PM";
+      if (efLocation) efLocation.value = "中正紀念堂(音樂廳)";
+      if (efLocationUrl) efLocationUrl.value = "https://maps.google.com/?q=國家音樂廳";
       if (efStatus) efStatus.value = "confirmed";
       if (adminSaveEventBtn) adminSaveEventBtn.textContent = "💾 儲存並新增活動";
       const addTab = document.querySelector('.admin-tab[data-admin-tab="add"]');
@@ -2239,7 +2324,16 @@ function setupSheet() {
       const cat = adminCategoryFilter ? adminCategoryFilter.value : "all";
 
       const filtered = appEvents.filter(evt => {
-        const matchesCat = cat === "all" || evt.category === cat;
+        let matchesCat = true;
+        if (cat !== "all") {
+          if (cat === "cksmh_concert") {
+            matchesCat = (evt.location && evt.location.includes("音樂廳")) || (evt.title && evt.title.includes("音樂廳"));
+          } else if (cat === "cksmh_theater") {
+            matchesCat = (evt.location && evt.location.includes("戲劇院")) || (evt.title && evt.title.includes("戲劇院"));
+          } else {
+            matchesCat = evt.category === cat;
+          }
+        }
         let matchesQuery = true;
         if (q) {
           const text = `${evt.title} ${evt.location} ${evt.topic || ''} ${evt.date}`.toLowerCase();
@@ -2371,7 +2465,7 @@ function setupSheet() {
         const monthNum = isNaN(d.getMonth()) ? 1 : d.getMonth() + 1;
 
         const categoryVal = efCategory.value;
-        const categoryName = CATEGORY_MAP[categoryVal]?.label || "外展活動";
+        const categoryName = CATEGORY_MAP[categoryVal]?.label || "練舞活動";
 
         if (id) {
           // Update existing
